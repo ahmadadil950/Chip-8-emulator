@@ -135,6 +135,7 @@ bool chip_8::load(const char *file_path) // init and loading ROM into memory
     return true;
 }
 
+
 /**
  * Beginning of emulation cycle
  * Where all OPCODE will be executed
@@ -156,42 +157,42 @@ void chip_8::emu_cycle()
 
         switch(opcode & 0x000F)
         {
-        case 0x0000:                    // 00E0: Clear screen
-        for(int i = 0; i<2048; ++i)
-        {
-            display[i] = 0;
+            case 0x0000:                    // 00E0: Clear screen
+                for(int i = 0; i<2048; ++i)
+                {
+                    display[i] = 0;
+                }
+
+                drawflag = true;
+
+                PC += 2;
+            
+            break;
+
+        /**
+         * 
+         * 0EEE
+         * return from subroutines
+         * removing (“popping”) the last address from the stack and setting the PC to it.
+         */
+        case 0x000E:
+            --SP;
+            PC = stack[SP];
+            PC += 2;
+            break;
+
+        default:
+        printf("\nUnknown opcode: %.4X\n", opcode);
+        exit(3);
         }
-
-        drawflag = true;
-
-        PC += 2;
-        
         break;
-
-    /**
-     * 
-     * 0EEE
-     * return from subroutines
-     * removing (“popping”) the last address from the stack and setting the PC to it.
-     */
-    case 0x000E:
-    --SP;
-    PC = stack[SP];
-    PC += 2;
-    break;
-
-    default:
-    printf("\nUnknown opcode: %.4X\n", opcode);
-    exit(3);
-    }
-    break;
 
 /**
  * 1NNN - Jump directly to address NNN
  * 
  */
 case 0x1000:
-PC = opcode & 0x0FFF;
+    PC = opcode & 0x0FFF;
 break;
 
 /**
@@ -201,9 +202,9 @@ break;
  * instruction should first push the current PC to the stack, so the subroutine can return later.
  */
 case 0x2000:
-stack[SP] = PC;
-++SP;
-PC = opcode & 0x0FFF;
+    stack[SP] = PC;
+    ++SP;
+    PC = opcode & 0x0FFF;
 break;
 
 /**
@@ -211,13 +212,13 @@ break;
  * 3XNN
  */
 case 0x3000:
-if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
-{
-    PC += 4; 
-}
-else{
-    PC+=2;
-}
+    if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+    {
+        PC += 4; 
+    }
+    else{
+        PC+=2;
+    }
 break;
 
 /**
@@ -225,13 +226,13 @@ break;
  * 4XNN
  */
 case 0x4000:
-if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
-{
-    PC += 4; 
-}
-else{
-    PC+=2;
-}
+    if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+    {
+        PC += 4; 
+    }
+    else{
+        PC+=2;
+    }
 break;
 
 /**
@@ -239,21 +240,21 @@ break;
  * Skips to the next instruction if VX equals VY
  */
 case 0x5000:
-if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
-{
-    PC += 4; 
-}
-else{
-    PC+=2;
-}
+    if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+    {
+        PC += 4; 
+    }
+    else{
+        PC+=2;
+    }
 break;
 
 /**
  * 6XNN - Sets VX to NN
  */
 case 0x6000:
-V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
-PC += 2;
+    V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
+    PC += 2;
 break;
 
 /**
@@ -261,8 +262,8 @@ break;
  * Add value NN to VX
  */
 case 0x7000:
-V[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
-PC += 2;
+    V[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
+    PC += 2;
 break;
 
 /*8XY: Logical and arithmetic instructions*/
@@ -271,114 +272,114 @@ case 0x8000:
     {
         // 8XY0: Sets VX to value of VY
         case 0x0000:
-        V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00FF) >> 4]; // 8XY0 - Sets VX to the value of VY.
-        PC+=2;
+            V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00FF) >> 4]; // 8XY0 - Sets VX to the value of VY.
+            PC+=2;
         break;
 
         // 8XY1: VX is set to the bitwise/binary logical disjunction (OR) of VX and VY. VY is not affected.
         case 0x0001:
-        V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00FF) >> 4];
-        PC+=2;
+            V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00FF) >> 4];
+            PC+=2;
         break;
 
         // 8XY2: VX is set to the bitwise/binary logical disjunction (AND) of VX and VY. VY is not affected.
         case 0x0002:
-        V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00FF) >> 4];
-        PC+=2;
+            V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00FF) >> 4];
+            PC+=2;
         break;
 
         // 8XY3: VX is set to the bitwise/binary exclusive OR (XOR) of VX and VY. VY is not affected.
         case 0x0003:
-        V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00FF) >> 4];
-        PC+=2;
+            V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00FF) >> 4];
+            PC+=2;
         break;
 
         // 8XY4 (ADD): VX is set to the value of VX plus the value of VY. VY is not affected.
         case 0x0004:
-        V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00FF) >> 4];
-        if(V[(opcode & 0x00F0 >> 4)] > (0xFF - V[(opcode & 0x0F00) >> 8]))
-        {
-            V[0xF] = 1;
-        }
-        else
-        {
-            V[0xF] = 0;
-        }
-        PC+=2;
+            V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00FF) >> 4];
+            if(V[(opcode & 0x00F0 >> 4)] > (0xFF - V[(opcode & 0x0F00) >> 8]))
+            {
+                V[0xF] = 1;
+            }
+            else
+            {
+                V[0xF] = 0;
+            }
+            PC+=2;
         break;
 
         // 8XY5 (Subtract): sets VX to the result of VX - VY. VF is set to 0 when
         //                  there's a borrow, and 1 when there isn't.
         case 0x0005:
-        if(V[(opcode & 0x00F0 >> 4)] > (0xFF - V[(opcode & 0x0F00) >> 8]))
-        {
-            V[0xF] = 0;
-        }
-        else
-        {
-            V[0xF] = 1;
-        }
-        V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00FF) >> 4];
-        PC+=2;
+            if(V[(opcode & 0x00F0 >> 4)] > (0xFF - V[(opcode & 0x0F00) >> 8]))
+            {
+                V[0xF] = 0;
+            }
+            else
+            {
+                V[0xF] = 1;
+            }
+            V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00FF) >> 4];
+            PC+=2;
         break;
 
         //8XY6 (shift): Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
         case 0x0006:
-        V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x1;
-        V[(opcode & 0x0F00) >> 8] >>=1;
-        PC+=2;
+            V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x1;
+            V[(opcode & 0x0F00) >> 8] >>=1;
+            PC+=2;
         break;
 
         // 8XY7 (subtract): sets VX to the result of VY - VX.
         case 0x0007:
-        if(V[(opcode & 0x00F0 >> 8)] > (0xFF - V[(opcode & 0x0F00) >> 4]))
-        {
-            V[0xF] = 0;
-        }
-        else
-        {
-            V[0xF] = 1;
-        }
-        V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00FF) >> 4] - V[(opcode & 0x0F00) >> 8];
-        PC+=2;
+            if(V[(opcode & 0x00F0 >> 8)] > (0xFF - V[(opcode & 0x0F00) >> 4]))
+            {
+                V[0xF] = 0;
+            }
+            else
+            {
+                V[0xF] = 1;
+            }
+            V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00FF) >> 4] - V[(opcode & 0x0F00) >> 8];
+            PC+=2;
         break;
 
         // 8XYE: Shifts VX Left by one. VF is set to the value of the least significant bit of VX before the shift.
         case 0x000E:
-        V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
-        V[(opcode & 0x0F00) >> 8] <<=1;
-        PC+=2;
-        break;
+            V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
+            V[(opcode & 0x0F00) >> 8] <<=1;
+            PC+=2;
+            break;
 
-        default:
-        printf("\nUnknown opcode: %.4X\n", opcode);
+            default:
+            printf("\nUnknown opcode: %.4X\n", opcode);
         exit(3);
     }
     break;
 
     // 9XY0 (skip): Skips to the next instruction if VX NOT equal VY
     case 0x9000:
-    if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4])
-    PC += 4;
-    else
-    PC += 2;
+        if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4])
+        PC += 4;
+        else
+        PC += 2;
     break;
 
     // ANNN: Set index - sets the index register I to the value NNN.
     case 0xA000:
-    I = opcode & 0x0FFF;
-    PC+=2;
+        I = opcode & 0x0FFF;
+        PC+=2;
     break;
 
     // BNNN: Jump with offset. Jump to address NNN + V0
     case 0xB000:
-    PC = (opcode & 0x0FFF) + V[0];
+        PC = (opcode & 0x0FFF) + V[0];
     break;
 
     // CXNN: Random - Sets VX to a random number, masked by NN. 
     case 0xC000:
-    V[(opcode & 0x0F00) >> 8] = (rand() % (0xFF+1)) & (opcode & 0x00FF);
-    PC += 2;
+        V[(opcode & 0x0F00) >> 8] = (rand() % (0xFF+1)) & (opcode & 0x00FF);
+        PC += 2;
     break;
 
     // DXYN: Display
@@ -406,11 +407,11 @@ case 0x8000:
             for(int xLine = 0; xLine < 8; xLine++)
             {
                 if((p & (0x80 >> xLine)) != 0){
-                if(display[(X+xLine + ((Y+yLine) * 64))] == 1)
-                {
-                    V[0xF] = 1;
-                }
-                display[X+xLine+((Y+yLine)*64)] ^= 1;
+                    if(display[(X+xLine + ((Y+yLine) * 64))] == 1)
+                    {
+                        V[0xF] = 1;
+                    }
+                    display[X+xLine+((Y+yLine)*64)] ^= 1;
                 }
             }
         }
@@ -426,18 +427,18 @@ case 0x8000:
     {
         // EX9E (Skip if key): skip one instruction (increment PC by 2) if the key corresponding to the value in VX is pressed.
         case 0x009E:
-        if (key[V[(opcode & 0x0F00) >> 8]] != 0)
-        PC+=4;
-        else
-        PC+=2;
+            if (key[V[(opcode & 0x0F00) >> 8]] != 0)
+            PC+=4;
+            else
+            PC+=2;
         break;
 
         // EXA1 (Skip if key): Skip if the key corresponding to the value in VX is NOT pressed
         case 0x00A1:
-        if (key[V[(opcode & 0x0F00) >> 8]] == 0)
-        PC+=4;
-        else
-        PC+=2;
+            if (key[V[(opcode & 0x0F00) >> 8]] == 0)
+            PC+=4;
+            else
+            PC+=2;
         break;
 
         default:
@@ -452,8 +453,8 @@ case 0x8000:
     {       
             // FX07: sets VX to the current value of the delay timer
             case 0x0007:
-            V[(opcode & 0x0F00) >> 8] = d_timer;
-            PC+=2;
+                V[(opcode & 0x0F00) >> 8] = d_timer;
+                PC+=2;
             break;
 
             // FX0A: Get key - A key press is awaited, and then stored in VX 
@@ -478,23 +479,23 @@ case 0x8000:
 
         // FX15 - sets the delay timer to the value in VX
         case 0x0015:
-        d_timer = V[(opcode & 0x0F00) >> 8];
-        PC+=2;
+            d_timer = V[(opcode & 0x0F00) >> 8];
+            PC+=2;
         break;
 
         // FX18 - sets the sound timer to the value in VX
         case 0x0018:
-        s_timer = V[(opcode & 0x0F00) >> 8];
-        PC+=2;
+            s_timer = V[(opcode & 0x0F00) >> 8];
+            PC+=2;
         break;
 
         // FX1E - Add to index, index register I will get the value in VX added to it.
         // VF is set to 1 when range overflow (I+VX>0xFFF), and 0 when there isn't.
         case 0x001E:
             if(I + V[(opcode & 0x0F00) >> 8] > 0xFFF)
-            V[0xF] = 1;
+                V[0xF] = 1;
             else
-            V[0xF] = 0;
+                V[0xF] = 0;
 
             I += V[(opcode & 0x0F00) >> 8];
             PC+=2;
@@ -502,8 +503,8 @@ case 0x8000:
 
         // FX29 - Font character - Set I to the location for the character sprite in VX.
         case 0x0029:
-        I = V[(opcode & 0x0F00) >> 8] * 0x5;
-        PC+=2;
+            I = V[(opcode & 0x0F00) >> 8] * 0x5;
+            PC+=2;
         break;
 
         /**
@@ -528,26 +529,26 @@ case 0x8000:
          * 
          */
         case 0x0055:
-        for(int i = 0; i <= ((opcode & 0x0F00)>> 8 ); ++i)
-        {
-            MEM[(I+i) & 0xFFF] = V[i];
-        }
-            I += ((opcode & 0x0F00) >> 8) + 1;
-            PC+=2;
-            break;
+            for(int i = 0; i <= ((opcode & 0x0F00)>> 8 ); ++i)
+            {
+                MEM[(I+i) & 0xFFF] = V[i];
+            }
+                I += ((opcode & 0x0F00) >> 8) + 1;
+                PC+=2;
+        break;
         
         /**
          * FX65 does the same thing, except that it takes the value stored at the memory addresses 
          * and loads them into the variable registers instead.
          */
         case 0x0065:
-        for(int i = 0; i <= ((opcode & 0x0F00)>> 8 ); ++i)
-        {
-            V[i]=MEM[(I+i) & 0xFFF];
-        }
-            I += ((opcode & 0x0F00) >> 8) + 1;
-            PC+=2;
-            break;
+            for(int i = 0; i <= ((opcode & 0x0F00)>> 8 ); ++i)
+            {
+                V[i]=MEM[(I+i) & 0xFFF];
+            }
+                I += ((opcode & 0x0F00) >> 8) + 1;
+                PC+=2;
+        break;
         default:
         printf ("Unknown opcode [0xF000]: 0x%X\n", opcode);
     }
