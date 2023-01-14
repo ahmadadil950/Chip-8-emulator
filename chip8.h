@@ -60,18 +60,18 @@ private:
 
 public:
 
-uint8_t display[64*32]; // Graphics Buffer
-uint8_t key[16];        // Keypad
+    uint8_t display[64*32]; // Graphics Buffer
+    uint8_t key[16];        // Keypad
 
-bool drawflag;          // flag to indicate if a draw has occured
-bool playsound = false; // flag to indicate if sound needs to be played
+    bool drawflag;          // flag to indicate if a draw has occured
+    bool playsound = false; // flag to indicate if sound needs to be played
 
-void emu_cycle();       // Emulate a cycle
+    void emu_cycle();       // Emulate a cycle
 
-bool load(const char *file_path); // Load the ROM
+    bool load(const char *file_path); // Load the ROM
 
-chip_8();           // constructor
-~chip_8();          // deconstructor
+    chip_8();           // constructor
+    ~chip_8();          // deconstructor
 
 };
 

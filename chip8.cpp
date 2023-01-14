@@ -7,25 +7,24 @@
 
 using namespace std; 
 
-
 unsigned char fontset[80]
 {
-0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-0x20, 0x60, 0x20, 0x20, 0x70, // 1
-0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+    0x20, 0x60, 0x20, 0x20, 0x70, // 1
+    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
 chip_8::chip_8() {}
@@ -169,193 +168,193 @@ void chip_8::emu_cycle()
             
             break;
 
-        /**
-         * 
-         * 0EEE
-         * return from subroutines
-         * removing (“popping”) the last address from the stack and setting the PC to it.
-         */
-        case 0x000E:
-            --SP;
-            PC = stack[SP];
-            PC += 2;
-            break;
-
-        default:
-        printf("\nUnknown opcode: %.4X\n", opcode);
-        exit(3);
-        }
-        break;
-
-/**
- * 1NNN - Jump directly to address NNN
- * 
- */
-case 0x1000:
-    PC = opcode & 0x0FFF;
-break;
-
-/**
- * 2NNN - Calls subroutine at NNN
- * 2NNN calls the subroutine at memory location NNN. Just like 1NNN.
- * set PC to NNN 
- * instruction should first push the current PC to the stack, so the subroutine can return later.
- */
-case 0x2000:
-    stack[SP] = PC;
-    ++SP;
-    PC = opcode & 0x0FFF;
-break;
-
-/**
- * Skips to the next instruction if VX equals NN
- * 3XNN
- */
-case 0x3000:
-    if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
-    {
-        PC += 4; 
-    }
-    else{
-        PC+=2;
-    }
-break;
-
-/**
- * Skips to the next instruction if VX is NOT equal to NN
- * 4XNN
- */
-case 0x4000:
-    if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
-    {
-        PC += 4; 
-    }
-    else{
-        PC+=2;
-    }
-break;
-
-/**
- * 5XY0
- * Skips to the next instruction if VX equals VY
- */
-case 0x5000:
-    if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
-    {
-        PC += 4; 
-    }
-    else{
-        PC+=2;
-    }
-break;
-
-/**
- * 6XNN - Sets VX to NN
- */
-case 0x6000:
-    V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
-    PC += 2;
-break;
-
-/**
- * 7XNN: Add
- * Add value NN to VX
- */
-case 0x7000:
-    V[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
-    PC += 2;
-break;
-
-/*8XY: Logical and arithmetic instructions*/
-case 0x8000:
-    switch (opcode & 0x000F)
-    {
-        // 8XY0: Sets VX to value of VY
-        case 0x0000:
-            V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00FF) >> 4]; // 8XY0 - Sets VX to the value of VY.
-            PC+=2;
-        break;
-
-        // 8XY1: VX is set to the bitwise/binary logical disjunction (OR) of VX and VY. VY is not affected.
-        case 0x0001:
-            V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00FF) >> 4];
-            PC+=2;
-        break;
-
-        // 8XY2: VX is set to the bitwise/binary logical disjunction (AND) of VX and VY. VY is not affected.
-        case 0x0002:
-            V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00FF) >> 4];
-            PC+=2;
-        break;
-
-        // 8XY3: VX is set to the bitwise/binary exclusive OR (XOR) of VX and VY. VY is not affected.
-        case 0x0003:
-            V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00FF) >> 4];
-            PC+=2;
-        break;
-
-        // 8XY4 (ADD): VX is set to the value of VX plus the value of VY. VY is not affected.
-        case 0x0004:
-            V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00FF) >> 4];
-            if(V[(opcode & 0x00F0 >> 4)] > (0xFF - V[(opcode & 0x0F00) >> 8]))
-            {
-                V[0xF] = 1;
-            }
-            else
-            {
-                V[0xF] = 0;
-            }
-            PC+=2;
-        break;
-
-        // 8XY5 (Subtract): sets VX to the result of VX - VY. VF is set to 0 when
-        //                  there's a borrow, and 1 when there isn't.
-        case 0x0005:
-            if(V[(opcode & 0x00F0 >> 4)] > (0xFF - V[(opcode & 0x0F00) >> 8]))
-            {
-                V[0xF] = 0;
-            }
-            else
-            {
-                V[0xF] = 1;
-            }
-            V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00FF) >> 4];
-            PC+=2;
-        break;
-
-        //8XY6 (shift): Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
-        case 0x0006:
-            V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x1;
-            V[(opcode & 0x0F00) >> 8] >>=1;
-            PC+=2;
-        break;
-
-        // 8XY7 (subtract): sets VX to the result of VY - VX.
-        case 0x0007:
-            if(V[(opcode & 0x00F0 >> 8)] > (0xFF - V[(opcode & 0x0F00) >> 4]))
-            {
-                V[0xF] = 0;
-            }
-            else
-            {
-                V[0xF] = 1;
-            }
-            V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00FF) >> 4] - V[(opcode & 0x0F00) >> 8];
-            PC+=2;
-        break;
-
-        // 8XYE: Shifts VX Left by one. VF is set to the value of the least significant bit of VX before the shift.
-        case 0x000E:
-            V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
-            V[(opcode & 0x0F00) >> 8] <<=1;
-            PC+=2;
+            /**
+             * 
+             * 0EEE
+             * return from subroutines
+             * removing (“popping”) the last address from the stack and setting the PC to it.
+             */
+            case 0x000E:
+                --SP;
+                PC = stack[SP];
+                PC += 2;
             break;
 
             default:
             printf("\nUnknown opcode: %.4X\n", opcode);
-        exit(3);
-    }
+            exit(3);
+        }
+        break;
+
+    /**
+     * 1NNN - Jump directly to address NNN
+     * 
+     */
+    case 0x1000:
+        PC = opcode & 0x0FFF;
     break;
+
+    /**
+     * 2NNN - Calls subroutine at NNN
+     * 2NNN calls the subroutine at memory location NNN. Just like 1NNN.
+     * set PC to NNN 
+     * instruction should first push the current PC to the stack, so the subroutine can return later.
+     */
+    case 0x2000:
+        stack[SP] = PC;
+        ++SP;
+        PC = opcode & 0x0FFF;
+    break;
+
+    /**
+     * Skips to the next instruction if VX equals NN
+     * 3XNN
+     */
+    case 0x3000:
+        if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+        {
+            PC += 4; 
+        }
+        else{
+            PC+=2;
+        }
+    break;
+
+    /**
+     * Skips to the next instruction if VX is NOT equal to NN
+     * 4XNN
+     */
+    case 0x4000:
+        if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+        {
+            PC += 4; 
+        }
+        else{
+            PC+=2;
+        }
+    break;
+
+    /**
+     * 5XY0
+     * Skips to the next instruction if VX equals VY
+     */
+    case 0x5000:
+        if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+        {
+            PC += 4; 
+        }
+        else{
+            PC+=2;
+        }
+    break;
+
+    /**
+     * 6XNN - Sets VX to NN
+     */
+    case 0x6000:
+        V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
+        PC += 2;
+    break;
+
+    /**
+     * 7XNN: Add
+     * Add value NN to VX
+     */
+    case 0x7000:
+        V[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
+        PC += 2;
+    break;
+
+    /*8XY: Logical and arithmetic instructions*/
+    case 0x8000:
+        switch (opcode & 0x000F)
+        {
+            // 8XY0: Sets VX to value of VY
+            case 0x0000:
+                V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00FF) >> 4]; // 8XY0 - Sets VX to the value of VY.
+                PC+=2;
+            break;
+
+            // 8XY1: VX is set to the bitwise/binary logical disjunction (OR) of VX and VY. VY is not affected.
+            case 0x0001:
+                V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00FF) >> 4];
+                PC+=2;
+            break;
+
+            // 8XY2: VX is set to the bitwise/binary logical disjunction (AND) of VX and VY. VY is not affected.
+            case 0x0002:
+                V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00FF) >> 4];
+                PC+=2;
+            break;
+
+            // 8XY3: VX is set to the bitwise/binary exclusive OR (XOR) of VX and VY. VY is not affected.
+            case 0x0003:
+                V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00FF) >> 4];
+                PC+=2;
+            break;
+
+            // 8XY4 (ADD): VX is set to the value of VX plus the value of VY. VY is not affected.
+            case 0x0004:
+                V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00FF) >> 4];
+                if(V[(opcode & 0x00F0 >> 4)] > (0xFF - V[(opcode & 0x0F00) >> 8]))
+                {
+                    V[0xF] = 1;
+                }
+                else
+                {
+                    V[0xF] = 0;
+                }
+                PC+=2;
+            break;
+
+            // 8XY5 (Subtract): sets VX to the result of VX - VY. VF is set to 0 when
+            //                  there's a borrow, and 1 when there isn't.
+            case 0x0005:
+                if(V[(opcode & 0x00F0 >> 4)] > (0xFF - V[(opcode & 0x0F00) >> 8]))
+                {
+                    V[0xF] = 0;
+                }
+                else
+                {
+                    V[0xF] = 1;
+                }
+                V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00FF) >> 4];
+                PC+=2;
+            break;
+
+            //8XY6 (shift): Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
+            case 0x0006:
+                V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x1;
+                V[(opcode & 0x0F00) >> 8] >>=1;
+                PC+=2;
+            break;
+
+            // 8XY7 (subtract): sets VX to the result of VY - VX.
+            case 0x0007:
+                if(V[(opcode & 0x00F0 >> 8)] > (0xFF - V[(opcode & 0x0F00) >> 4]))
+                {
+                    V[0xF] = 0;
+                }
+                else
+                {
+                    V[0xF] = 1;
+                }
+                V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00FF) >> 4] - V[(opcode & 0x0F00) >> 8];
+                PC+=2;
+            break;
+
+            // 8XYE: Shifts VX Left by one. VF is set to the value of the least significant bit of VX before the shift.
+            case 0x000E:
+                V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
+                V[(opcode & 0x0F00) >> 8] <<=1;
+                PC+=2;
+                break;
+
+                default:
+                printf("\nUnknown opcode: %.4X\n", opcode);
+            exit(3);
+        }
+        break;
 
     // 9XY0 (skip): Skips to the next instruction if VX NOT equal VY
     case 0x9000:
@@ -560,20 +559,20 @@ case 0x8000:
     exit(3);
     }
 
-/**
- * Timer updates
- * Along with the simple implementation of sound 
- */
-if(d_timer > 0)
-    {
-    d_timer--;
-    }
+    /**
+     * Timer updates
+     * Along with the simple implementation of sound 
+     */
+    if(d_timer > 0)
+        {
+        d_timer--;
+        }
 
-   if(s_timer > 0)
-    if(s_timer == 1)
-    {
-        playsound = true;
-    }
+    if(s_timer > 0)
+        if(s_timer == 1)
+        {
+            playsound = true;
+        }
 
-   --s_timer;
+    --s_timer;
 }  
