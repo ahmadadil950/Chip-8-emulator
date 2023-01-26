@@ -2,7 +2,7 @@
 #include <thread>
 #include <chrono>
 #include "stdint.h"
-#include <SDL.h> 
+#include "SDL2/SDL.h"
 #include "chip8.h"
 using namespace std;
 
