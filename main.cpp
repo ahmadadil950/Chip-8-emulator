@@ -1,10 +1,9 @@
 #include <iostream>
-#include <chrono>
 #include <thread>
+#include <chrono>
 #include "stdint.h"
 #include "SDL2/SDL.h"
 #include "chip8.h"
-
 using namespace std;
 
 
@@ -27,6 +26,12 @@ uint8_t keymap[16] =
     SDLK_f,
     SDLK_v,
 };
+
+void playsound(SDL_AudioDeviceID device_ID, uint8_t *waveBuffer, uint32_t waveLength)
+{
+    int play = SDL_QueueAudio(device_ID,waveBuffer,waveLength);
+    SDL_PauseAudioDevice(device_ID,0);
+}
 
 int main(int argc, char **argv)
 {
@@ -65,6 +70,15 @@ int main(int argc, char **argv)
 
     SDL_Texture* sdlTexture = SDL_CreateTexture(renderer,
     SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,64, 32);
+
+    /*Loading in audio*/
+    SDL_AudioSpec wav_Spec;
+    uint32_t wavlength;
+    uint8_t* wave_Buffer;
+
+    SDL_LoadWAV("music.wav", &wav_Spec, &wave_Buffer, &wavlength);
+
+    SDL_AudioDeviceID device_ID = SDL_OpenAudioDevice(NULL,0,&wav_Spec,NULL,0);
 
     uint32_t pixel[2048];
 
@@ -127,6 +141,12 @@ int main(int argc, char **argv)
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, sdlTexture, NULL, NULL);
             SDL_RenderPresent(renderer);
+    }
+
+    if(Chip8.playsound)
+    {
+        playsound(device_ID,wave_Buffer,wavlength);
+        Chip8.playsound = false;
     }
     std::this_thread::sleep_for(std::chrono::microseconds(1800));
     }
