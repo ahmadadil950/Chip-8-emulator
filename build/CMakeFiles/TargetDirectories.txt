@@ -1,3 +1,0 @@
-/media/sf_csc332-hw/CSC332-hw/chip8_unix/chip8/build/CMakeFiles/chip8.dir
-/media/sf_csc332-hw/CSC332-hw/chip8_unix/chip8/build/CMakeFiles/edit_cache.dir
-/media/sf_csc332-hw/CSC332-hw/chip8_unix/chip8/build/CMakeFiles/rebuild_cache.dir
